@@ -280,7 +280,7 @@ section:nth-child(2n){
   background: repeating-linear-gradient(-45deg, #91d2e2 0 8px, #1296a7 0 12px) content-box;
   --c: radial-gradient(farthest-side, #000 94%, #0000);
   -webkit-mask:
-    linear-gradient(#0000 0 0),
+    linear-gradient(#0000 0 0,#0000 50%),
     var(--c) -10px -10px,
     var(--c) 15px -14px,
     var(--c) 9px -6px,
@@ -289,9 +289,9 @@ section:nth-child(2n){
     var(--c) 23px 27px,
     var(--c) -8px 35px,
     var(--c) 50% 50%,
-    linear-gradient(#000 0 0);
+    linear-gradient(#000 0 0,#0000 50%);
   mask:
-    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0,#0000 50%),
     var(--c) -10px -10px,
     var(--c) 15px -14px,
     var(--c) 9px -6px,
@@ -300,7 +300,7 @@ section:nth-child(2n){
     var(--c) 23px 27px,
     var(--c) -8px 35px,
     var(--c) 50% 50%,
-    linear-gradient(#0000 0 0);
+    linear-gradient(#0000 0 0,#0000 50%);
   -webkit-mask-composite: destination-out;
   mask-composite: exclude, add, add, add, add, add, add, add, add;
   -webkit-mask-repeat: no-repeat;
