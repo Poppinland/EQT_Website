@@ -20,24 +20,24 @@
       margin: 0;
     }
     .character-container {
-      position: relative;
+      position: absolute;
       display: flex;
       justify-content: flex-start;
       align-items: center;
       width: 100%;
       height: 100vh;
       overflow: hidden;
-      padding-left: 20px;
-      left: 300px;
+      padding-left: 350px;
     }
     .character-background {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       background-image: url('img/background.webp');
       background-size: cover;
+      background-attachment: fixed;
       background-position: center;
       z-index: -1;
     }
@@ -75,7 +75,7 @@
       font-family: "DotGothic16", sans-serif;
       font-weight: 400;
       font-style: normal;
-      opacity: 0.6;
+      opacity: 0.8;
       width: 250px;
       height: 50px;
     }
@@ -103,8 +103,10 @@
 
     h1 {
       position: absolute;
-      top: 30px;
+      top: 10px;
       text-align: center;
+      color: dimgrey;
+      font-size: 20px;
     }
 
     #ios {
@@ -113,10 +115,40 @@
       right: 30px;
     }
 
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .character_logo {
+      width: 80px;
+      height: 80px;
+      animation: bounce 3s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
   </style>
 </head>
 <body>
-<h1>P O P P I N </br>What You Eat Is What I Am</h1>
+<h1>
+<div class="container">
+  <img src="img/P1.png" alt="Character 1" class="character_logo">
+  <img src="img/O1.png" alt="Character 2" class="character_logo">
+  <img src="img/P1.png" alt="Character 3" class="character_logo">
+  <img src="img/P1.png" alt="Character 4" class="character_logo">
+  <img src="img/I1.png" alt="Character 5" class="character_logo">
+  <img src="img/N.png" alt="Character 6" class="character_logo">
+</div>
+What You Eat Is What I Am
+</h1>
 
 <div class="character-container">
   <div class="character-background"></div>
@@ -208,6 +240,20 @@
     typeWriter();
     nftImage.src = imageUrl;
   }
+  const characters = document.querySelectorAll('.character_logo');
+
+  function animateCharacters() {
+    characters.forEach((character, index) => {
+      setTimeout(() => {
+        character.style.animation = 'none';
+        setTimeout(() => {
+          character.style.animation = '';
+        }, 50);
+      }, index * 200);
+    });
+  }
+
+  setInterval(animateCharacters, 2000);
 </script>
 </body>
 </html>
