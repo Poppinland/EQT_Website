@@ -4,6 +4,7 @@
   <title>NFT Transfer Info</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
@@ -221,9 +222,7 @@ What You Eat Is What I Am
     const nftName = event.nft.name;
     const imageUrl = event.nft.image_url;
 
-    speechBubble.innerHTML = `
-    <p>"<span id="nftName">${nftName}</span>"を<br>"<span id="toAddress">${toAddress.substring(0,8)}...</span>"へ送ったよ！</p>
-  `;
+    speechBubble.innerHTML = ``;
     nftImage.src = imageUrl;
   }
 
