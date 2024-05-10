@@ -40,6 +40,7 @@
       background-attachment: fixed;
       background-position: center;
       z-index: -1;
+      opacity: 0.9;
     }
     .character {
       position: relative;
@@ -261,7 +262,7 @@ What You Eat Is What I Am
     const nftName = event.nft.name;
     const imageUrl = event.nft.image_url;
 
-    const message = `We sent NFT"${nftName}" to \n"${toAddress.substring(0, 8)}...Popi!!!!`;
+    const message = `We sent NFT"${nftName}" to \n"${toAddress.substring(0, 8)}"...Popi!!!!`;
     let currentIndex = 0;
 
     speechBubble.innerHTML = '';
