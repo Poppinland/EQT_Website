@@ -6,6 +6,7 @@
     <title>Poppin Roadmap</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        /* 既存のスタイルはそのまま維持 */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #ffffff;
@@ -79,55 +80,27 @@
             margin-right: 8px;
             font-size: 24px;
         }
-        #game-container {
+        /* ゲーム用のスタイルを追加 */
+        #gameContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 400px;
-            height: 600px;
-            margin: 0 auto;
-            position: relative;
-            overflow: hidden;
-            background-color: #87CEEB;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
             display: none;
         }
-        #game-character {
-            width: 50px;
-            height: 50px;
-            background-image: url('https://poppin-public-assets.s3.us-west-1.amazonaws.com/poppins/7/0/gif/0.gif');
-            background-size: cover;
-            position: absolute;
-            left: 50px;
-        }
-        .pipe {
-            width: 60px;
-            position: absolute;
-            right: -60px;
-            background-color: #4CAF50;
-        }
-        #score {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 24px;
-            color: white;
-        }
-        #countdown {
+        #gameFrame {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 48px;
-            color: white;
-            display: none;
-        }
-        @media (max-width: 768px) {
-            .timeline-item {
-                padding-left: 20px;
-            }
-            .segment-title {
-                left: -4px;
-                font-size: 12px;
-                padding: 3px 10px;
-            }
+            width: 90%;
+            max-width: 800px;
+            height: 90%;
+            max-height: 600px;
+            border: none;
         }
     </style>
 </head>
@@ -135,6 +108,7 @@
     <div class="container">
         <h1>Poppin Roadmap</h1>
         <div class="timeline">
+            <!-- 既存のタイムラインコンテンツはそのまま -->
             <div class="timeline-item">
                 <span class="segment-title">By November</span>
                 <div class="timeline-content">
@@ -180,140 +154,17 @@
             </div>
         </div>
     </div>
-    <div id="game-container">
-        <div id="game-character"></div>
-        <div id="score">0</div>
-        <div id="countdown"></div>
+    <div id="gameContainer">
+        <iframe id="gameFrame" src="sushi_game.html"></iframe>
     </div>
     <script>
-        const character = document.getElementById('game-character');
-        const gameContainer = document.getElementById('game-container');
-        const scoreElement = document.getElementById('score');
-        const countdownElement = document.getElementById('countdown');
-
-        let gameLoop;
-        let characterY = 300;
-        let velocity = 0;
-        let gravity = 0.5;
-        let score = 0;
-        let pipes = [];
-        let gameStarted = false;
-
-        function startGame() {
-            characterY = 300;
-            velocity = 0;
-            score = 0;
-            scoreElement.textContent = score;
-            pipes = [];
-            gameLoop = setInterval(updateGame, 20);
-            setTimeout(createPipe, 1500);
-            gameStarted = true;
-        }
-
-        function updateGame() {
-            velocity += gravity;
-            characterY += velocity;
-            
-            if (characterY > 550) {
-                characterY = 550;
-                velocity = 0;
-            }
-            if (characterY < 0) {
-                characterY = 0;
-                velocity = 0;
-            }
-            
-            character.style.top = characterY + 'px';
-            
-            pipes.forEach((pipe, index) => {
-                pipe.x -= 2;
-                pipe.element.style.left = pipe.x + 'px';
-                
-                if (pipe.x < -60) {
-                    gameContainer.removeChild(pipe.element);
-                    pipes.splice(index, 1);
-                    score++;
-                    scoreElement.textContent = score;
-                }
-                
-                if (checkCollision(pipe)) {
-                    endGame();
-                }
-            });
-        }
-
-        function createPipe() {
-            const gap = 200;
-            const minHeight = 50;
-            const maxHeight = 400;
-            const height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
-            
-            const lowerPipe = document.createElement('div');
-            lowerPipe.className = 'pipe';
-            lowerPipe.style.height = (600 - height - gap) + 'px';
-            lowerPipe.style.bottom = '0';
-            
-            const upperPipe = document.createElement('div');
-            upperPipe.className = 'pipe';
-            upperPipe.style.height = height + 'px';
-            upperPipe.style.top = '0';
-            
-            gameContainer.appendChild(lowerPipe);
-            gameContainer.appendChild(upperPipe);
-            
-            pipes.push({x: 400, element: lowerPipe});
-            pipes.push({x: 400, element: upperPipe});
-            
-            if (gameStarted) {
-                setTimeout(createPipe, 3000);
-            }
-        }
-
-        function checkCollision(pipe) {
-            const characterRect = character.getBoundingClientRect();
-            const pipeRect = pipe.element.getBoundingClientRect();
-            
-            return !(characterRect.right < pipeRect.left || 
-                     characterRect.left > pipeRect.right || 
-                     characterRect.bottom < pipeRect.top || 
-                     characterRect.top > pipeRect.bottom);
-        }
-
-        function endGame() {
-            clearInterval(gameLoop);
-            gameStarted = false;
-            alert('Game Over! Your score: ' + score);
-            gameContainer.style.display = 'none';
-        }
-
-        function startCountdown() {
-            gameContainer.style.display = 'block';
-            let count = 5;
-            countdownElement.style.display = 'block';
-
-            const countdownInterval = setInterval(() => {
-                countdownElement.textContent = count;
-                count--;
-
-                if (count < 0) {
-                    clearInterval(countdownInterval);
-                    countdownElement.style.display = 'none';
-                    startGame();
-                }
-            }, 1000);
-        }
-
-        gameContainer.addEventListener('click', () => {
-            if (gameStarted) {
-                velocity = -8;
-            }
-        });
-
         let scrollTimeout;
         function checkScroll() {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
                 clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(startCountdown, 5000);
+                scrollTimeout = setTimeout(() => {
+                    document.getElementById('gameContainer').style.display = 'block';
+                }, 5000);
             }
         }
 

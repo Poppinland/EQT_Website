@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IKA Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2c3e50;
+            font-family: 'Roboto', sans-serif;
+            color: #ecf0f1;
+        }
+        #gameCanvas {
+            border: 2px solid #34495e;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+        #buttonContainer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 80px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        .button {
+            padding: 12px 24px;
+            font-size: 18px;
+            color: #ecf0f1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif;
+            display: none;
+            width: 200px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        #restartButton {
+            background-color: #27ae60;
+        }
+        #restartButton:hover {
+            background-color: #2ecc71;
+        }
+        #twitterButton {
+            background-color: #2980b9;
+        }
+        #twitterButton:hover {
+            background-color: #3498db;
+        }
+        .button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <div id="buttonContainer">
+        <button id="restartButton" class="button">Restart Game</button>
+        <button id="twitterButton" class="button">Tweet Score</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const twitterButton = document.getElementById('twitterButton');
+        const restartButton = document.getElementById('restartButton');
+
+        const initialGameSpeed = 2;
+        const initialObstacleFrequency = 0.015;
+
+        const player = {
+            x: 50,
+            y: canvas.height / 2,
+            width: 60,
+            height: 60,
+            velocity: 0,
+            gravity: 0.4,
+            jumpStrength: -8
+        };
+
+        const playerImage = new Image();
+        playerImage.src = 'https://i.seadn.io/gcs/files/82b52d95496a392fc59ca6d449814a5f.png?auto=format&dpr=1&w=1000';
+
+        const obstacles = [];
+        const sushiTypes = [
+            'MAGURO', 'TORO', 'SAKE', 'TAI', 'SABA', 'EBI', 'UNI', 'IKA', 'TAKO',
+            'IKURA', 'TAMAGO', 'UNAGI', 'ANAGO', 'KANI', 'AJI', 'BURI', 'HOTATE',
+            'AMAEBI', 'HIRAME', 'IWASHI'
+        ];
+        let score = 0;
+        let gameSpeed = initialGameSpeed;
+        let obstacleFrequency = initialObstacleFrequency;
+        let gameOver = false;
+        let lastObstacleTime = 0;
+        const minObstacleInterval = 1500;
+
+        function drawPlayer() {
+            ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
+        }
+
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                ctx.save();
+                ctx.fillStyle = '#ecf0f1';
+                ctx.font = '28px Roboto';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const chars = obstacle.type.split('');
+                const totalChars = chars.length;
+                const charHeight = obstacle.height / totalChars;
+
+                chars.forEach((char, index) => {
+                    const x = obstacle.x + obstacle.width / 2;
+                    const y = obstacle.y + charHeight * (index + 0.5);
+                    ctx.fillText(char, x, y);
+                });
+
+                ctx.restore();
+            });
+        }
+
+        function updatePlayer() {
+            player.velocity += player.gravity;
+            player.y += player.velocity;
+
+            if (player.y > canvas.height - player.height) {
+                player.y = canvas.height - player.height;
+                player.velocity = 0;
+            }
+
+            if (player.y < 0) {
+                player.y = 0;
+                player.velocity = 0;
+            }
+        }
+
+        function updateObstacles() {
+            const currentTime = Date.now();
+            if (currentTime - lastObstacleTime > minObstacleInterval && Math.random() < obstacleFrequency) {
+                const sushiType = sushiTypes[Math.floor(Math.random() * sushiTypes.length)];
+                const minHeight = canvas.height * 0.2;
+                const maxHeight = canvas.height * 0.4;
+                const baseHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+                const height = Math.min(baseHeight + sushiType.length * 12, canvas.height * 0.8);
+                
+                obstacles.push({
+                    x: canvas.width,
+                    y: canvas.height - height,
+                    width: 60,
+                    height: height,
+                    type: sushiType
+                });
+
+
+                if (score >= 5 && Math.random() < 0.30) {
+                    obstacles.push({
+                        x: canvas.width,
+                        y: 0,
+                        width: 60,
+                        height: 70,
+                        type: 'GARI'
+                    });
+                }
+
+                lastObstacleTime = currentTime;
+            }
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= gameSpeed;
+
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                    score++;
+                    increaseDifficulty();
+                }
+            }
+        }
+
+        function increaseDifficulty() {
+            if (score % 15 === 0) {
+                gameSpeed += 0.2;
+                obstacleFrequency = Math.min(obstacleFrequency + 0.001, 0.03);
+            }
+        }
+
+        function checkCollision() {
+            for (let obstacle of obstacles) {
+                if (
+                    player.x < obstacle.x + obstacle.width &&
+                    player.x + player.width > obstacle.x &&
+                    player.y < obstacle.y + obstacle.height &&
+                    player.y + player.height > obstacle.y
+                ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function drawScore() {
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = '24px Roboto';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Score: ${score}`, 20, 40);
+        }
+
+        function drawGameOver() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = 'bold 60px Roboto';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
+
+            ctx.font = '36px Roboto';
+            ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+
+            restartButton.style.display = 'block';
+            twitterButton.style.display = 'block';
+        }
+
+        function resetGame() {
+            player.y = canvas.height / 2;
+            player.velocity = 0;
+            obstacles.length = 0;
+            score = 0;
+            gameSpeed = initialGameSpeed;
+            obstacleFrequency = initialObstacleFrequency;
+            gameOver = false;
+            lastObstacleTime = 0;
+            restartButton.style.display = 'none';
+            twitterButton.style.display = 'none';
+        }
+
+        function gameLoop() {
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (!gameOver) {
+                updatePlayer();
+                updateObstacles();
+                drawPlayer();
+                drawObstacles();
+                drawScore();
+
+                if (checkCollision()) {
+                    gameOver = true;
+                }
+            } else {
+                drawPlayer();
+                drawObstacles();
+                drawScore();
+                drawGameOver();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !gameOver) {
+                player.velocity = player.jumpStrength;
+            }
+        });
+
+        twitterButton.addEventListener('click', () => {
+            const tweetText = `I scored ${score} points🍣 in Poppin Roadmap! Can you beat my score?😋 See here https://poppinland.github.io/EQT_Website/poppin_roadmap.html`;
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+            window.open(tweetUrl, '_blank');
+        });
+
+        restartButton.addEventListener('click', () => {
+            resetGame();
+            gameLoop();
+        });
+
+        playerImage.onload = () => {
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
