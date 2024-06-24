@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poppin Roadmap</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #1a1a1a;
+            font-size: 36px;
+            margin-bottom: 50px;
+            font-weight: 600;
+        }
+        .timeline {
+            position: relative;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: #e0e0e0;
+        }
+        .timeline-item {
+            margin-bottom: 60px;
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline-content {
+            background: #f8f8f8;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .timeline-content h2 {
+            margin-top: 0;
+            color: #4a4a4a;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .timeline-content ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+        .timeline-content li {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        .segment-title {
+            position: absolute;
+            left: -8px;
+            top: 0;
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 600;
+            background-color: #3498db;
+            padding: 4px 12px;
+            border-radius: 16px;
+            z-index: 2;
+        }
+        .emoji {
+            margin-right: 8px;
+            font-size: 24px;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            background-color: #87CEEB;
+            display: none;
+        }
+        #game-character {
+            width: 50px;
+            height: 50px;
+            background-image: url('https://poppin-public-assets.s3.us-west-1.amazonaws.com/poppins/7/0/gif/0.gif');
+            background-size: cover;
+            position: absolute;
+            left: 50px;
+        }
+        .pipe {
+            width: 60px;
+            position: absolute;
+            right: -60px;
+            background-color: #4CAF50;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: white;
+        }
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: white;
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .timeline-item {
+                padding-left: 20px;
+            }
+            .segment-title {
+                left: -4px;
+                font-size: 12px;
+                padding: 3px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Poppin Roadmap</h1>
+        <div class="timeline">
+            <div class="timeline-item">
+                <span class="segment-title">By November</span>
+                <div class="timeline-content">
+                    <h2><span class="emoji">🚀</span>Main Feature Development</h2>
+                    <ul>
+                        <li>Limited Edition Popotama</li>
+                        <li>Social Features</li>
+                        <li>Mainnet Launch (Planned for late July)</li>
+                        <li>Room & Furniture Features</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="segment-title">Mid-November</span>
+                <div class="timeline-content">
+                    <h2><span class="emoji">🎉</span>Official Release</h2>
+                    <ul>
+                        <li>Browser Version</li>
+                        <li>Launch Celebration Event</li>
+                        <li>Collaboration Campaigns</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="segment-title">February 2025</span>
+                <div class="timeline-content">
+                    <h2><span class="emoji">📱</span>Native App Release</h2>
+                    <ul>
+                        <li>Release iOS App</li>
+                        <li>Release Android App</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <span class="segment-title">2025 Onwards</span>
+                <div class="timeline-content">
+                    <h2><span class="emoji">🌍</span>Global Expansion</h2>
+                    <ul>
+                        <li>Continuous Addition of Global Foods</li>
+                        <li>Regular Events and Campaigns</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="game-container">
+        <div id="game-character"></div>
+        <div id="score">0</div>
+        <div id="countdown"></div>
+    </div>
+    <script>
+        const character = document.getElementById('game-character');
+        const gameContainer = document.getElementById('game-container');
+        const scoreElement = document.getElementById('score');
+        const countdownElement = document.getElementById('countdown');
+
+        let gameLoop;
+        let characterY = 300;
+        let velocity = 0;
+        let gravity = 0.5;
+        let score = 0;
+        let pipes = [];
+        let gameStarted = false;
+
+        function startGame() {
+            characterY = 300;
+            velocity = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            pipes = [];
+            gameLoop = setInterval(updateGame, 20);
+            setTimeout(createPipe, 1500);
+            gameStarted = true;
+        }
+
+        function updateGame() {
+            velocity += gravity;
+            characterY += velocity;
+            
+            if (characterY > 550) {
+                characterY = 550;
+                velocity = 0;
+            }
+            if (characterY < 0) {
+                characterY = 0;
+                velocity = 0;
+            }
+            
+            character.style.top = characterY + 'px';
+            
+            pipes.forEach((pipe, index) => {
+                pipe.x -= 2;
+                pipe.element.style.left = pipe.x + 'px';
+                
+                if (pipe.x < -60) {
+                    gameContainer.removeChild(pipe.element);
+                    pipes.splice(index, 1);
+                    score++;
+                    scoreElement.textContent = score;
+                }
+                
+                if (checkCollision(pipe)) {
+                    endGame();
+                }
+            });
+        }
+
+        function createPipe() {
+            const gap = 200;
+            const minHeight = 50;
+            const maxHeight = 400;
+            const height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+            
+            const lowerPipe = document.createElement('div');
+            lowerPipe.className = 'pipe';
+            lowerPipe.style.height = (600 - height - gap) + 'px';
+            lowerPipe.style.bottom = '0';
+            
+            const upperPipe = document.createElement('div');
+            upperPipe.className = 'pipe';
+            upperPipe.style.height = height + 'px';
+            upperPipe.style.top = '0';
+            
+            gameContainer.appendChild(lowerPipe);
+            gameContainer.appendChild(upperPipe);
+            
+            pipes.push({x: 400, element: lowerPipe});
+            pipes.push({x: 400, element: upperPipe});
+            
+            if (gameStarted) {
+                setTimeout(createPipe, 3000);
+            }
+        }
+
+        function checkCollision(pipe) {
+            const characterRect = character.getBoundingClientRect();
+            const pipeRect = pipe.element.getBoundingClientRect();
+            
+            return !(characterRect.right < pipeRect.left || 
+                     characterRect.left > pipeRect.right || 
+                     characterRect.bottom < pipeRect.top || 
+                     characterRect.top > pipeRect.bottom);
+        }
+
+        function endGame() {
+            clearInterval(gameLoop);
+            gameStarted = false;
+            alert('Game Over! Your score: ' + score);
+            gameContainer.style.display = 'none';
+        }
+
+        function startCountdown() {
+            gameContainer.style.display = 'block';
+            let count = 5;
+            countdownElement.style.display = 'block';
+
+            const countdownInterval = setInterval(() => {
+                countdownElement.textContent = count;
+                count--;
+
+                if (count < 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.style.display = 'none';
+                    startGame();
+                }
+            }, 1000);
+        }
+
+        gameContainer.addEventListener('click', () => {
+            if (gameStarted) {
+                velocity = -8;
+            }
+        });
+
+        let scrollTimeout;
+        function checkScroll() {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(startCountdown, 5000);
+            }
+        }
+
+        window.addEventListener('scroll', checkScroll);
+    </script>
+</body>
+</html>
